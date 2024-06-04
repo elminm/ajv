@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import * as XLSX from 'xlsx';
 
 function FileUploader() {
@@ -27,13 +27,13 @@ function FileUploader() {
         const wsname = wb.SheetNames[0];
         const ws = wb.Sheets[wsname];
         const data = XLSX.utils.sheet_to_json(ws);
-        validateData(data);
+        validateData(data, file);
       };
       reader.readAsArrayBuffer(file);
     }
   };
 
-  const validateData = (data) => {
+  const validateData = (data,file) => {
     const schema = schemas[selectedSchema];
     let isValid = true;
     for (let row of data) {
@@ -46,15 +46,13 @@ function FileUploader() {
       if (!isValid) break;
     }
     if (isValid) {
-      setData(data);
+      setData(file);
       setValidationResult("File is valid!");
     } else {
       setValidationResult(`Invalid file format for ${selectedSchema}.`);
     }
   };
-  console.log({
-    data
-  });
+ 
   return (
     <div>
       <div>
@@ -63,7 +61,9 @@ function FileUploader() {
           <option value="typeB">Type B</option>
         </select>
       </div>
-      <input type="file" accept=".xlsx, .xls" onChange={handleFileChange} />
+      <input type="file" accept=".xlsx, .xls" value={
+        data.length > 0 ? data.name : ""
+      } onChange={handleFileChange} />
       <div>{validationResult}</div>
       {data.length > 0 && <pre>{JSON.stringify(data, null, 2)}</pre>}
     </div>
